@@ -8,11 +8,10 @@ from latch.types.metadata import (
 )
 
 PARAMS = {
-    "sample": LatchParameter(
-        display_name="Paired-end reads",
-        description="FASTQ files",
-        batch_table_column=True,
+    "samplesheet": LatchParameter(
+        display_name="Input samplesheet",
     ),
+    "out": LatchParameter(display_name="Output directory"),
 }
 
 FLOW = [
@@ -26,7 +25,7 @@ FLOW = [
     )
 ]
 
-WORKFLOW_NAME = "workflow"
+WORKFLOW_NAME = "nf-core/fetchngs"
 
 wf_docs = LatchMetadata(
     display_name=WORKFLOW_NAME,
@@ -39,5 +38,5 @@ wf_docs = LatchMetadata(
     license="MIT",
     parameters=PARAMS,
     tags=["NGS"],
-    flow=FLOW,
+    # flow=FLOW,
 )

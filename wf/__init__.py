@@ -6,56 +6,55 @@ from latch.resources.launch_plan import LaunchPlan
 from latch.types import LatchDir, LatchFile
 
 from .docs import wf_docs
-from .types import Sample
 
 
-@medium_task
-def run_software(sample: Sample) -> LatchDir:
-    """Task to run a software"""
+@medium_task(retries=10)
+def fetchngs_task(samplesheet: LatchFile, out: str) -> LatchDir:
 
-    sample_name = sample.name
-    results_path = "program_results"
-    output_dir = Path(results_path).resolve()
-    output_dir.mkdir(parents=True, exist_ok=True)
+    results_dir = Path("methylseq_results").resolve()
 
-    output_prefix = f"{str(output_dir)}/{sample_name}"
-
-    _run_cmd = [
-        "software",
-        "--in1",
-        sample.read1.local_path,
-        "--in2",
-        sample.read2.local_path,
-        "-o",
-        output_prefix,
+    methylseq_cmd = [
+        f"""
+        nextflow run nf-core/fetchngs \
+        -profile conda \
+        -r 1.9 \
+        --input {samplesheet.local_path} \
+        --outdir {str(results_dir)}
+        """
     ]
 
-    subprocess.run(_run_cmd)
+    subprocess.run(methylseq_cmd, check=True, shell=True)
 
-    return LatchDir(str(output_dir), f"latch:///{results_path}/{sample_name}")
+    return LatchDir(str(results_dir), f"latch:///{out}")
 
 
 @workflow(wf_docs)
-def test_workflow(sample: Sample) -> LatchDir:
-    """Workflow to do X
+def fetchngs(
+    samplesheet: LatchFile,
+    out: str = "fetchngs_results",
+) -> LatchDir:
+    """Pipeline to fetch metadata and raw FastQ files from public and private databases
 
-    Header
+    nf-core/fetchngs
     ------
 
-    This is a workflow that does X.
+    nf-core/fetchngs is a bioinformatics pipeline to fetch metadata and raw FastQ files from both public and private databases. At present, the pipeline supports SRA / ENA / DDBJ / Synapse ids.
+
+    ## Citations
+
+    If you use nf-core/fetchngs for your analysis, please cite it using the following doi: 10.5281/zenodo.5070524
 
     """
-    return run_software(sample=sample)
+    return fetchngs_task(samplesheet=samplesheet, out=out)
 
 
 LaunchPlan(
-    test_workflow,
+    fetchngs,
     "Test Data",
     {
-        "sample": Sample(
-            name="SRR579292",
-            read1=LatchFile("s3://latch-public/test-data/4318/SRR579292_1.fastq"),
-            read2=LatchFile("s3://latch-public/test-data/4318/SRR579292_2.fastq"),
-        )
+        "samplesheet": LatchFile(
+            "s3://latch-public/test-data/4318/fetchngs_sra_ids_test.csv"
+        ),
+        "out": "fetchngs_results",
     },
 )
