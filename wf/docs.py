@@ -18,17 +18,18 @@ FLOW = [
     Section(
         "Samples",
         Text(
-            "Sample provided has to include an identifier for the sample (Sample name)"
-            " and two files corresponding to the reads (paired-end)"
+            "The samplesheet must be a list of identifiers, one on each line."
+            "Currently accepted run identifiers are SRA, ERA and DDBJ IDs."
         ),
-        Params("sample"),
-    )
+        Params("samplesheet"),
+    ),
+    Section("Output", Text("The name of the output directory."), Params("out")),
 ]
 
-WORKFLOW_NAME = "nf-core/fetchngs"
+WORKFLOW_NAME = "nfcore_fetchngs"
 
 wf_docs = LatchMetadata(
-    display_name=WORKFLOW_NAME,
+    display_name="nf-core/fetchngs",
     documentation=f"https://github.com/jvfe/{WORKFLOW_NAME}_latch/blob/main/README.md",
     author=LatchAuthor(
         name="jvfe",
@@ -38,5 +39,5 @@ wf_docs = LatchMetadata(
     license="MIT",
     parameters=PARAMS,
     tags=["NGS"],
-    # flow=FLOW,
+    flow=FLOW,
 )

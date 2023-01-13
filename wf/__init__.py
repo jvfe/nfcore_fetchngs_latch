@@ -11,7 +11,7 @@ from .docs import wf_docs
 @medium_task(retries=10)
 def fetchngs_task(samplesheet: LatchFile, out: str) -> LatchDir:
 
-    results_dir = Path("methylseq_results").resolve()
+    results_dir = Path("fetchngs_results").resolve()
 
     methylseq_cmd = [
         f"""
